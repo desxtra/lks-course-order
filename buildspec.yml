@@ -1,0 +1,52 @@
+version: 0.2
+env:
+  variables:
+    ECR_REPO: 834549009763.dkr.ecr.us-east-1.amazonaws.com/lks/schalke
+    ECR_REGION: us-east-1
+    CONTAINER_NAME: LKS_Order_Container
+
+  parameter-store:
+    AWS_ACCESS_KEY: /course-catalog/production/AWS_ACCESS_KEY
+    AWS_SECRET_KEY: /course-catalog/production/AWS_SECRET_KEY
+    AWS_BUCKET_NAME: /course-catalog/production/AWS_BUCKET_NAME
+    AWS_BUCKET_REGION: /course-catalog/production/AWS_BUCKET_REGION
+    DOCKER_PASSWORD: /course-catalog/production/DOCKER_PASSWORD
+    DOCKER_USERNAME: /course-catalog/production/DOCKER_USERNAME
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+    commands:
+      - echo "Install Dependencies"
+      - yum update -y
+
+  pre_build:
+    commands:
+      - echo "Logging into ECR..."
+      - aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin 834549009763.dkr.ecr.us-east-1.amazonaws.com || echo "ECR login failed"
+      - echo "Logging into Docker Hub..."
+      - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+  build:
+    commands:
+      - echo "Building docker images..."
+      - docker build -t lks/order .
+
+  post_build:
+    commands:
+      - echo "Pushing the image to ECR..."
+      - docker tag lks/order:latest 834549009763.dkr.ecr.us-east-1.amazonaws.com/lks/order:latest || echo "Failed to tag Docker image"
+      - docker push 834549009763.dkr.ecr.us-east-1.amazonaws.com/lks/order:latest || { echo "Failed to push Docker image to ECR"; exit 1; }
+      - echo "Image has been pushed into ECR..."
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME ${ECR_REPO}:latest > imagedefinitions.json
+      - echo "Build complete."
+
+reports:
+  test-report:
+    files:
+      - 'report/test-result.xml'
+    file-format: JUNITXML
+
+artifacts:
+  files:
+    - imagedefinitions.json
