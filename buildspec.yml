@@ -1,7 +1,7 @@
 version: 0.2
 env:
   variables:
-    ECR_REPO: 834549009763.dkr.ecr.us-east-1.amazonaws.com/lks/schalke
+    ECR_REPO: 834549009763.dkr.ecr.us-east-1.amazonaws.com/lks/order
     ECR_REGION: us-east-1
     CONTAINER_NAME: LKS_Order_Container
 
