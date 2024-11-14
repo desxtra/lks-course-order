@@ -1,0 +1,17 @@
+{
+   "AWSEBDockerrunVersion": "1",
+   "Authentication": {
+      "Bucket": "pipeline-bucket-smknega",
+      "Key": "dkcfg"
+   },
+   "Image": {
+      "Name": "834549009763.dkr.ecr.us-east-1.amazonaws.com/lks/order:latest"
+   },
+   "Ports": [
+      {
+         "ContainerPort": 8000,
+         "HostPort": 8081
+    
+      }
+   ]
+}
