@@ -27,6 +27,8 @@ phases:
       - aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin 834549009763.dkr.ecr.us-east-1.amazonaws.com || echo "ECR login failed"
       - echo "Logging into Docker Hub..."
       - echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+      - echo "Uploading Dockerrun.aws.json into S3 bucket"
+      - aws s3 cp Dockerrun.aws.json s3://pipeline-bucket-smknega/EB/EB_Order/
   build:
     commands:
       - echo "Building docker images..."
